@@ -145,7 +145,7 @@ def tree_copy_with_ref(
         return tree
 
 
-def tree_split(tree: tp.Any) -> list[tp.Any]:
+def tree_split(tree: tp.Any, only_batch: bool = False) -> list[tp.Any]:
     """Split tree-structured data into a list of data samples."""
 
     def get_batch_size(tree: tp.Any) -> int | None:
@@ -177,7 +177,10 @@ def tree_split(tree: tp.Any) -> list[tp.Any]:
     batch_size = get_batch_size(tree)
     assert batch_size is not None, "Cannot determine batch size"
     for i in range(batch_size):
-        ret.append(get_batch(tree, i))
+        if only_batch:
+            ret.append(tree)
+        else:
+            ret.append(get_batch(tree, i))
     return ret
 
 

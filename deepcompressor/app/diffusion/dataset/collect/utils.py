@@ -61,7 +61,7 @@ class CollectHook:
         else:
             raise ValueError(f"Unknown model: {module}")
         cache = tree_map(lambda x: x.cpu(), {"input_args": new_args, "input_kwargs": input_kwargs, "outputs": output})
-        split_cache = tree_split(cache)
+        split_cache = tree_split(cache, True if isinstance(module, FluxTransformer2DModel) else False)
 
         if isinstance(module, PixArtTransformer2DModel) and self.zero_redundancy:
             for cache in split_cache:
