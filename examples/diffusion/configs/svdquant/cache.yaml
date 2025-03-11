@@ -1,6 +1,8 @@
 skip_eval: true
 skip_gen: true
 quant:
+  cache_calib_act: true
+  layers_need_to_be_cached: layers_need_to_be_cache.pkl
   wgts:
     dtype: sint4
     group_shapes:

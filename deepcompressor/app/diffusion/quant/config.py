@@ -51,6 +51,7 @@ class DiffusionQuantConfig(DiffusionModuleQuantizerConfig):
     develop_dtype: torch.dtype = field(default_factory=lambda s=torch.float32: eval_dtype(s, with_quant_dtype=False))
     force_acts_quantizer_cache: bool = False
     cache_calib_act: bool = False
+    layers_need_to_be_cached: str = ""
 
     def __post_init__(self) -> None:  # noqa: C901
         super().__post_init__()

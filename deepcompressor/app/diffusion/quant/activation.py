@@ -273,7 +273,7 @@ def quantize_diffusion_activations(
             if needs_quant_opts:
                 opts_quantizer.as_hook(is_output=True).register(module)
     return quantizer_state_dict
-
+import pickle
 @torch.inference_mode()
 def cache_calib_act(
     model: nn.Module | DiffusionModelStruct,
@@ -285,7 +285,11 @@ def cache_calib_act(
     assert isinstance(model, DiffusionModelStruct)
     skip_pre_modules = all(key in config.ipts.skips for key in model.get_prev_module_keys())
     skip_post_modules = all(key in config.ipts.skips for key in model.get_post_module_keys())
+    with open(config.layers_need_to_be_cached, "rb") as f:
+        target_layrs = pickle.load(f)
     cache_dict = {}
+    for layer in target_layrs:
+        cache_dict[layer] = {"sr": 0, "num": 0}
     with tools.logging.redirect_tqdm():
         for layer_name, (layer, layer_cache, layer_kwargs) in tqdm(
             config.calib.build_loader().iter_layer_activations(
@@ -300,7 +304,20 @@ def cache_calib_act(
             total=model.num_blocks + int(not skip_post_modules) + int(not skip_pre_modules) * 3,
             dynamic_ncols=True,
         ):
-            breakpoint()
-            if layer_name not in cache_dict:
-                cache_dict[layer_name] = {"max": 1e10, "min": -1e10, "ave": 0, "num": 0}
-            # cache_dict[layer_name]['max'] = 
+            for k in layer_cache:
+                if k in cache_dict:
+                    tensor_cache = cache_dict[k].inputs[0]
+                    tensor = tensor_cache.data[0]
+                    channel_dim = tensor_cache.channels_dim
+                    if channel_dim < 0:
+                        channel_dim = len(tensor.shape) + channel_dim
+                    max_tensor = torch.max(tensor, dim=channel_dim, keepdim=True).values
+                    min_tensor = torch.min(tensor, dim=channel_dim, keepdim=True).values
+                    sr = max_tensor / (tensor - min_tensor)
+                    mean_dims = [d for d in range(tensor.dim()) if d != channel_dim]
+                    sr = sr.mean(dim=mean_dims)
+                    cache_dict[layer]["sr"] = cache_dict[layer]["sr"] + sr
+                    cache_dict[layer]["num"] = cache_dict[layer]["num"] + 1
+    layer_sr = {k:cache_dict[k]["sr"] / cache_dict[layer]["num"] if cache_dict[layer]["num"] != 0 else 1 for k in cache_dict}
+    with open(config.layers_need_to_be_cached.replace(".pkl", "_sr.pkl"), "wb") as f:
+        pickle.dump(layer_sr, f)
