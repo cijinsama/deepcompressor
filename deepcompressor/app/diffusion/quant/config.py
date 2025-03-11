@@ -49,6 +49,7 @@ class DiffusionQuantConfig(DiffusionModuleQuantizerConfig):
     rotation: QuantRotationConfig | None = None
     smooth: SmoothTransfomerConfig | None = None
     develop_dtype: torch.dtype = field(default_factory=lambda s=torch.float32: eval_dtype(s, with_quant_dtype=False))
+    force_acts_quantizer_cache: bool
 
     def __post_init__(self) -> None:  # noqa: C901
         super().__post_init__()
@@ -100,6 +101,8 @@ class DiffusionQuantConfig(DiffusionModuleQuantizerConfig):
     @property
     def needs_acts_quantizer_cache(self) -> bool:
         """Whether to cache the activations quantizer settings."""
+        if self.force_acts_quantizer_cache:
+            return True
         if self.enabled_ipts and self.ipts.needs_calib_data:
             return True
         if self.enabled_opts and self.opts.needs_calib_data:

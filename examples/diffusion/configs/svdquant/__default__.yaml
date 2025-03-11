@@ -1,5 +1,5 @@
 quant:
-  enable_smooth: true
+  enable_smooth: false
   smooth:
     enable_proj: true
     proj:
@@ -12,7 +12,7 @@ quant:
       alpha: 0.5
       beta: -2
       num_grids: 20
-      allow_low_rank: true
+      allow_low_rank: false
       fuse_when_possible: false
       skips:
       - embed
@@ -24,7 +24,7 @@ quant:
       - down_sample
       - up_sample
   wgts:
-    enable_low_rank: true
+    enable_low_rank: false
     low_rank:
       rank: 32
       early_stop: true

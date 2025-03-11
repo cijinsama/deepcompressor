@@ -1,7 +1,7 @@
 seed: 12345
 enable_cache: true
 cache:
-  root: runs
+  root: quant_cache
 output:
   root: runs
   dirname: default
@@ -117,3 +117,4 @@ quant:
       num_grids: 20
       skips: []
   develop_dtype: torch.float32
+  force_acts_quantizer_cache: false
