@@ -314,8 +314,8 @@ class DiffusionCalibCacheLoader(BaseCalibCacheLoader):
         assert isinstance(model, nn.Module)
         action = DiffusionConcatCacheAction("cpu") if action is None else action
         layers, layer_structs, recomputes, use_prev_layer_outputs = model_struct.get_iter_layer_activations_args(
-            skip_pre_modules=False,
-            skip_post_modules=False,
+            skip_pre_modules=skip_pre_modules,
+            skip_post_modules=skip_post_modules,
             **self.dataset[0]["input_kwargs"],
         )
         for layer_idx, (layer_name, (layer, layer_cache, layer_inputs)) in enumerate(
