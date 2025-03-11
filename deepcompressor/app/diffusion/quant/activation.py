@@ -278,23 +278,7 @@ def quantize_diffusion_activations(
 def cache_calib_act(
     model: nn.Module | DiffusionModelStruct,
     config: DiffusionQuantConfig,
-) -> dict[str, dict[str, torch.Tensor | float | None]]:
-    """Quantize the activations of a diffusion model.
-
-    Args:
-        model (`nn.Module` or `DiffusionModelStruct`):
-            The diffusion model.
-        config (`DiffusionQuantConfig`):
-            The quantization configuration.
-        quantizer_state_dict (`dict[str, dict[str, torch.Tensor | float | None]]`, *optional*, defaults to `None`):
-            The activation quantizers state dict cache.
-        orig_state_dict (`dict[str, torch.Tensor]`, *optional*, defaults to `None`):
-            The original state dictionary.
-
-    Returns:
-        `dict[str, dict[str, torch.Tensor | float | None]]`:
-            The activation quantizers state dict cache.
-    """
+):
     logger = tools.logging.getLogger(f"{__name__}.CacheCalibActivation")
     if not isinstance(model, DiffusionModelStruct):
         model = DiffusionModelStruct.construct(model)

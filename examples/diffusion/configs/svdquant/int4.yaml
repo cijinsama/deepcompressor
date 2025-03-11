@@ -1,6 +1,7 @@
 skip_eval: true
 skip_gen: true
 quant:
+  cache_calib_act: true
   wgts:
     dtype: sint4
     group_shapes:

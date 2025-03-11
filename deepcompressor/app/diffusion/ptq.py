@@ -158,6 +158,12 @@ def ptq(  # noqa: C901
     else:
         orig_state_dict = None
     # endregion
+    if config.cache_calib_act:
+        logger.info("  * Cache calib activations")
+        tools.logging.Formatter.indent_inc()
+        cache_calib_act(model, config)
+        tools.logging.Formatter.indent_dec()
+
     if load_model:
         logger.info(f"* Loading model checkpoint from {load_model_path}")
         load_diffusion_weights_state_dict(
@@ -267,11 +273,6 @@ def ptq(  # noqa: C901
         del orig_state_dict
         gc.collect()
         torch.cuda.empty_cache()
-    if config.cache_calib_act:
-        logger.info("  * Cache calib activations")
-        tools.logging.Formatter.indent_inc()
-        cache_calib_act(model, config)
-        tools.logging.Formatter.indent_dec()
     return model
 
 
