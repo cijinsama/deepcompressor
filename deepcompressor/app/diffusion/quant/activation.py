@@ -318,6 +318,6 @@ def cache_calib_act(
                     sr = sr.mean(dim=mean_dims)
                     cache_dict[layer]["sr"] = cache_dict[layer]["sr"] + sr
                     cache_dict[layer]["num"] = cache_dict[layer]["num"] + 1
-    layer_sr = {k:cache_dict[k]["sr"] / cache_dict[layer]["num"] if cache_dict[layer]["num"] != 0 else 1 for k in cache_dict}
+    layer_sr = {k:cache_dict[k]["sr"] / cache_dict[k]["num"] if cache_dict[k]["num"] != 0 else 1 for k in cache_dict}
     with open(config.layers_need_to_be_cached.replace(".pkl", "_sr.pkl"), "wb") as f:
         pickle.dump(layer_sr, f)
