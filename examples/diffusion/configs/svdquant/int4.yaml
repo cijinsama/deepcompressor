@@ -1,3 +1,5 @@
+skip_eval: true
+skip_gen: true
 quant:
   wgts:
     dtype: sint4
@@ -21,6 +23,5 @@ quant:
     scale_dtypes:
     - null
     allow_unsigned: true
-  force_acts_quantizer_cache: true
 pipeline:
   shift_activations: true

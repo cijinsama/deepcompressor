@@ -49,7 +49,8 @@ class DiffusionQuantConfig(DiffusionModuleQuantizerConfig):
     rotation: QuantRotationConfig | None = None
     smooth: SmoothTransfomerConfig | None = None
     develop_dtype: torch.dtype = field(default_factory=lambda s=torch.float32: eval_dtype(s, with_quant_dtype=False))
-    force_acts_quantizer_cache: bool
+    force_acts_quantizer_cache: bool = False
+    cache_calib_act: bool = False
 
     def __post_init__(self) -> None:  # noqa: C901
         super().__post_init__()

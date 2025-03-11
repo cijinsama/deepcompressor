@@ -273,3 +273,50 @@ def quantize_diffusion_activations(
             if needs_quant_opts:
                 opts_quantizer.as_hook(is_output=True).register(module)
     return quantizer_state_dict
+
+@torch.inference_mode()
+def cache_calib_act(
+    model: nn.Module | DiffusionModelStruct,
+    config: DiffusionQuantConfig,
+) -> dict[str, dict[str, torch.Tensor | float | None]]:
+    """Quantize the activations of a diffusion model.
+
+    Args:
+        model (`nn.Module` or `DiffusionModelStruct`):
+            The diffusion model.
+        config (`DiffusionQuantConfig`):
+            The quantization configuration.
+        quantizer_state_dict (`dict[str, dict[str, torch.Tensor | float | None]]`, *optional*, defaults to `None`):
+            The activation quantizers state dict cache.
+        orig_state_dict (`dict[str, torch.Tensor]`, *optional*, defaults to `None`):
+            The original state dictionary.
+
+    Returns:
+        `dict[str, dict[str, torch.Tensor | float | None]]`:
+            The activation quantizers state dict cache.
+    """
+    logger = tools.logging.getLogger(f"{__name__}.CacheCalibActivation")
+    if not isinstance(model, DiffusionModelStruct):
+        model = DiffusionModelStruct.construct(model)
+    assert isinstance(model, DiffusionModelStruct)
+    skip_pre_modules = all(key in config.ipts.skips for key in model.get_prev_module_keys())
+    skip_post_modules = all(key in config.ipts.skips for key in model.get_post_module_keys())
+    cache_dict = {}
+    with tools.logging.redirect_tqdm():
+        for layer_name, (layer, layer_cache, layer_kwargs) in tqdm(
+            config.calib.build_loader().iter_layer_activations(
+                model,
+                needs_inputs_fn=get_needs_inputs_fn(model, config=config),
+                needs_outputs_fn=get_needs_outputs_fn(model, config=config),
+                skip_pre_modules=skip_pre_modules,
+                skip_post_modules=skip_post_modules,
+            ),
+            desc="cache activations",
+            leave=False,
+            total=model.num_blocks + int(not skip_post_modules) + int(not skip_pre_modules) * 3,
+            dynamic_ncols=True,
+        ):
+            breakpoint()
+            if layer_name not in cache_dict:
+                cache_dict[layer_name] = {"max": 1e10, "min": -1e10, "ave": 0, "num": 0}
+            # cache_dict[layer_name]['max'] = 

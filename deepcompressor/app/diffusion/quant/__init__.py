@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .activation import quantize_diffusion_activations
+from .activation import quantize_diffusion_activations, cache_calib_act
 from .config import DiffusionQuantCacheConfig, DiffusionQuantConfig
 from .quantizer import DiffusionActivationQuantizer, DiffusionWeightQuantizer
 from .rotate import rotate_diffusion

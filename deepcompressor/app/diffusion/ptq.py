@@ -19,6 +19,7 @@ from .quant import (
     quantize_diffusion_weights,
     rotate_diffusion,
     smooth_diffusion,
+    cache_calib_act
 )
 
 __all__ = ["ptq"]
@@ -152,7 +153,7 @@ def ptq(  # noqa: C901
             orig_state_dict = None
         else:
             orig_state_dict: dict[str, torch.Tensor] = {
-                name: param.detach().clone() for name, param in model.module.named_parameters() if param.ndim > 1
+                name: param.detach().cpu().clone() for name, param in model.module.named_parameters() if param.ndim > 1
             }
     else:
         orig_state_dict = None
@@ -266,6 +267,11 @@ def ptq(  # noqa: C901
         del orig_state_dict
         gc.collect()
         torch.cuda.empty_cache()
+    if config.cache_calib_act:
+        logger.info("  * Cache calib activations")
+        tools.logging.Formatter.indent_inc()
+        cache_calib_act(model, config)
+        tools.logging.Formatter.indent_dec()
     return model
 
 
